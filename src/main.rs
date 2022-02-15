@@ -33,21 +33,18 @@ fn render() -> Vec<u8> {
 }
 
 fn mandelbrot(x0: f32, y0: f32) -> u16 {
-	// let (x0, y0) = coords(pixel_x, pixel_y);
 	let mut x: f32 = 0.0;
 	let mut y: f32 = 0.0;
 	let mut iter = 0;
 	let mut x2: f32 = 0.0;
 	let mut y2: f32 = 0.0;
-	loop {
+
+	while x2 + y2 > 4.0 || iter == ITER_MAX {
 		y = 2.0 * x * y + y0;
 		x = x2 - y2 + x0;
 		x2 = x * x;
 		y2 = y * y;
 		iter += 1;
-		if x2 + y2 > 4.0 || iter == ITER_MAX{
-			break;
-		}
 	}
 	iter
 }
@@ -57,7 +54,6 @@ fn color(iter: u16) -> [u8; 3] {
 		return [0,0,0];
 	}
 	let val = iter as f32 / ITER_MAX as f32;
-	// hsv2rgb(val.powf(0.75), 1.0, 1.0)
 	hsv2rgb((val * 4.0).fract(), 1.0, 1.0)
 }
 
@@ -70,7 +66,7 @@ fn save(image: Vec<u8>) {
 	let path = Path::new(PATH);
 	let file = File::create(path).unwrap();
 	let w = BufWriter::new(file);
-	let mut encoder = png::Encoder::new(w, SIZE_X as u32, SIZE_Y as u32); // Width is 2 pixels and height is 1.
+	let mut encoder = png::Encoder::new(w, SIZE_X as u32, SIZE_Y as u32);
 	encoder.set_color(png::ColorType::Rgb);
 	encoder.set_depth(png::BitDepth::Eight);
 
@@ -79,6 +75,7 @@ fn save(image: Vec<u8>) {
 }
 
 fn hsv2rgb (h: f32, s: f32, v: f32) -> [u8; 3] {
+	// magic from *somewhere*, I forgot
 	let hue = h * 6.0;
 	let sv = s * v;
 	let xf = sv * (1.0 - hue.rem(2.0).sub(1.0).abs());
@@ -95,6 +92,6 @@ fn hsv2rgb (h: f32, s: f32, v: f32) -> [u8; 3] {
 		3 => [m, x, c],
 		4 => [x, m, c],
 		5 => [c, m, x],
-		_ => panic!("hue outside of valid range")
+		_ => panic!("Hue outside of valid range!")
 	}
 }
